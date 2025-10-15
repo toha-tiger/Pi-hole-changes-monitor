@@ -1,0 +1,14 @@
+  # Add this service to pihole + nebula sync project to issue the sync on pihole config change
+  # put it inside service: section
+  monitor:
+    build: ./monitor/
+    environment:
+      WATCH_DIR: /etc/pihole
+      ONCHANGE_CMD: docker restart nebula-sync
+      EXCLUDE: '.db-journal|.db-shm|.db-wal|gravity.db|_old.db|listsCache|versions|cli_pw|logrotate|.log$$|.bak$$|.tmp$$|.temp$$|.swp$$'
+    volumes:
+      - ./etc-pihole:/etc/pihole:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - nebula-sync
+    restart: unless-stopped
