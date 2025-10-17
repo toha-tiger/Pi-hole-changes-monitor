@@ -53,6 +53,7 @@ services:
       ONCHANGE_CMD: docker run --rm --name nebula-sync --env-file nebula-sync.env --network pihole-net ghcr.io/lovelaze/nebula-sync:latest
       PIHOLE_API_URL: http://pihole
       PIHOLE_PASSWORD: 'correct horse battery staple'
+      TZ: 'Europe/London'
     volumes:
       - ./etc-pihole:/etc/pihole:ro
       - ./nebula-sync.env:/app/nebula-sync.env:ro

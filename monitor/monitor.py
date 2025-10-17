@@ -34,11 +34,11 @@ LOG_LEVEL = logging.INFO
 # Configure logging
 logging.basicConfig(
     level=LOG_LEVEL, # Minimum level to log
-    format='%(asctime)s [%(levelname)s] %(message)s'
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
 )
+logging.Formatter.converter = time.localtime
 logging.getLogger("watchdog").setLevel(logging.WARNING)
-
-SCRIPT_DIR = Path(__file__).resolve().parent
 
 
 @dataclass(slots=True)
