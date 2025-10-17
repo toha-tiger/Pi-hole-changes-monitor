@@ -1,11 +1,11 @@
 FROM alpine
 
 RUN apk update
-RUN apk add inotify-tools docker
+RUN apk add inotify-tools docker 
+RUN apk add python3 py3-requests py3-watchdog
 RUN mkdir -p /app
-COPY ./monitor.sh /app
-RUN chmod +x /app/monitor.sh
+COPY ./* /app
 
 WORKDIR /app
 
-ENTRYPOINT ["/app/monitor.sh"]
+ENTRYPOINT ["python", "/app/monitor.py"]
