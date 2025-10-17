@@ -4,7 +4,7 @@ Monitors Pi-hole config changes and starts Nebula Sync to trigger a sync
 
 The tool is intended for a Docker project that consists of Pi-hole and Nebula Sync. By default Nebula Sync cannot detect when exactly the configuration of Pi-hole changes. So usually a cron sync is configured for reasonable time period.
 
-The tool uses `inotifywait` to watch the Pi-hole configuration and start the Nebula Sync container, which triggers a sync
+The tool uses `watchdog.observers` to watch the Pi-hole configuration and start the Nebula Sync container, which triggers a sync
 
 Since a single change in config can trigger multiple changes in files, there is a debouncing time of 3 seconds before starting Nebula Sync. This means a change in Pi-hole configuration will be applied to other hosts after 3 seconds.
 
@@ -97,3 +97,4 @@ FULL_SYNC=true
   PIHOLE_API_URL: http://pihole
   PIHOLE_PASSWORD: 'correct horse battery staple'
   ```
+
