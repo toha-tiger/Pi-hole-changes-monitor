@@ -20,5 +20,5 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        docker build . --file monitor/Dockerfile --tag ghcr.io/${{ github.repository_owner }}/my-image:$(date +%s)
-        docker push ghcr.io/${{ github.repository_owner }}/my-image:$(date +%s)
+        docker build . --file monitor/Dockerfile --tag ghcr.io/${{ github.repository_owner }}/pi-hole-changes-monitor:$(date +%s)
+        docker push ghcr.io/${{ github.repository_owner }}/pi-hole-changes-monitor:$(date +%s)
