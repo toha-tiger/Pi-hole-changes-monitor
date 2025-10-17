@@ -10,7 +10,7 @@ Since a single change in config can trigger multiple changes in files, there is 
 
 ## Configuration/usage
 
-To use the tool, just add the `monitor` directory, a config for Nebula Sync `nebula-sync.env` and a service to your `docker-compose.yml`
+To use the tool, just add a config for Nebula Sync `nebula-sync.env` and a service to your `docker-compose.yml`
 
 See also `docker-compose.example.yml` for a complete example.
 
@@ -25,13 +25,15 @@ services:
     # ... standard configuration ...
     networks: [pihole-net]
   monitor:
-    build: ./monitor/
+    image: ghcr.io/toha-tiger/pi-hole-changes-monitor:main
     environment:
       WATCH_DIR: /etc/pihole
-      EXCLUDE: '.db-journal|.db_temp-journal|.db-shm|.db-wal|_old.db|_backups|listsCache|versions|cli_pw|logrotate|.log$$|.bak$$|.tmp$$|.temp$$|.swp$$'
+      WATCH_INCLUDE: '.db$$|.conf$$|.leases$$|.list$$|.toml$$'
+      WATCH_EXCLUDE: '_backup|_old.db'
       DEBOUNCE_TIME: 3
       ONCHANGE_CMD: docker run --rm --name nebula-sync --env-file nebula-sync.env --network pihole-net ghcr.io/lovelaze/nebula-sync:latest
-      ONCHANGE_CMD_TIME: 2
+      PIHOLE_API_URL: http://pihole
+      PIHOLE_PASSWORD: 'correct horse battery staple'
     volumes:
       - ./etc-pihole:/etc/pihole:ro
       - ./nebula-sync.env:/app/nebula-sync.env:ro
@@ -39,6 +41,7 @@ services:
     depends_on:
       - pihole
     restart: unless-stopped
+    networks: [pihole-net]
 ```
 
 `nebula-sync.env` should contain the configuration for Nebula Sync. Be sure not to enable the CRON option so Nebula Sync runs once and exits.
@@ -47,7 +50,6 @@ services:
 PRIMARY=http://ph1.example.com|password
 REPLICAS=http://ph2.example.com|password,http://ph3.example.com|password
 FULL_SYNC=true
-RUN_GRAVITY=true
 ```
 
 ## Configuration
@@ -65,10 +67,16 @@ RUN_GRAVITY=true
 
   Make sure ./etc-pihole points to the directory where the Pi-hole files are stored
 
-- Exclude files that change frequently during normal operation
+- Include files to monitor changes
 
   ```
-  EXCLUDE: '.db-journal|.db_temp-journal|.db-shm|.db-wal|_old.db|_backups|listsCache|versions|cli_pw|logrotate|.log$$|.bak$$|.tmp$$|.temp$$|.swp$$'
+  WATCH_INCLUDE: '.db$$|.conf$$|.leases$$|.list$$|.toml$$'
+  ```
+
+- Exclude temparary or backup files
+
+  ```
+  WATCH_EXCLUDE: '_backup|_old.db'
   ```
 
 - Debounce time. A time in seconds to ignore multiple changes in Pi-hole configuration files. Lower values make the sync run earlier but can trigger duplicate updates.
@@ -84,7 +92,8 @@ RUN_GRAVITY=true
 
   This command simply starts Nebula Sync. Ensure the container name matches the one defined in your docker-compose file. `--network pihole-net` must match the one that Pi-hole uses.
 
-- Graceful time after sync completes. Nebula Sync can trigger an update in local Pi-hole configs which we want to ignore. Too low a value can cause an infinite update loop: "change detected" -> "run Nebula Sync" -> "change detected" -> "run Nebula Sync" -> ...
+- Pi-hole primary instance url (in docker network) and a password. If your docker service Pi-hole named pihole then url is `http://pihole`. The password should match `FTLCONF_webserver_api_password` config
   ```
-  ONCHANGE_CMD_TIME: 2
+  PIHOLE_API_URL: http://pihole
+  PIHOLE_PASSWORD: 'correct horse battery staple'
   ```

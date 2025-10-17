@@ -44,7 +44,7 @@ services:
     restart: unless-stopped
     networks: [pihole-net]
   monitor:
-    build: ./monitor/
+    image: ghcr.io/toha-tiger/pi-hole-changes-monitor:main
     environment:
       WATCH_DIR: /etc/pihole
       WATCH_INCLUDE: '.db$$|.conf$$|.leases$$|.list$$|.toml$$'
