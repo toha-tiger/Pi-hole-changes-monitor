@@ -50,14 +50,13 @@ services:
       WATCH_INCLUDE: '.db$$|.conf$$|.leases$$|.list$$|.toml$$'
       WATCH_EXCLUDE: '_backup|_old.db'
       DEBOUNCE_TIME: 3
-      ONCHANGE_CMD: docker run --rm --name nebula-sync --env-file nebula-sync.env --network pihole-net ghcr.io/lovelaze/nebula-sync:latest
+      ONCHANGE_CMD: /app/nebula-sync/nebula-sync run --env-file /app/nebula-sync/.env
       PIHOLE_API_URL: http://pihole
       PIHOLE_PASSWORD: 'correct horse battery staple'
       TZ: 'Europe/London'
     volumes:
       - ./etc-pihole:/etc/pihole:ro
-      - ./nebula-sync.env:/app/nebula-sync.env:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./nebula-sync.env:/app/nebula-sync/.env:ro
     depends_on:
       - pihole
     restart: unless-stopped

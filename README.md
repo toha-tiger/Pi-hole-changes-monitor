@@ -1,10 +1,10 @@
 ## Description
 
-Monitors Pi-hole config changes and starts Nebula Sync to trigger a sync
+Monitors Pi-hole config changes and starts Nebula Sync to trigger a sync with other Pi-hole instances.
 
-The tool is intended for a Docker project that consists of Pi-hole and Nebula Sync. By default Nebula Sync cannot detect when exactly the configuration of Pi-hole changes. So usually a cron sync is configured for reasonable time period.
+The tool is intended for a Docker project that consists of Pi-hole. To perform a sync the Nebula Sync is used. By default Nebula Sync cannot detect when exactly the configuration of Pi-hole changes. So usually a cron sync is configured for reasonable time period.
 
-The tool uses `watchdog.observers` to watch the Pi-hole configuration and start the Nebula Sync container, which triggers a sync
+The tool uses `watchdog.observers` to watch the Pi-hole configuration and start the Nebula Sync, which triggers a sync.
 
 Since a single change in config can trigger multiple changes in files, there is a debouncing time of 3 seconds before starting Nebula Sync. This means a change in Pi-hole configuration will be applied to other hosts after 3 seconds.
 
@@ -31,14 +31,13 @@ services:
       WATCH_INCLUDE: '.db$$|.conf$$|.leases$$|.list$$|.toml$$'
       WATCH_EXCLUDE: '_backup|_old.db'
       DEBOUNCE_TIME: 3
-      ONCHANGE_CMD: docker run --rm --name nebula-sync --env-file nebula-sync.env --network pihole-net ghcr.io/lovelaze/nebula-sync:latest
+      ONCHANGE_CMD: /app/nebula-sync/nebula-sync run --env-file /app/nebula-sync/.env
       PIHOLE_API_URL: http://pihole
       PIHOLE_PASSWORD: 'correct horse battery staple'
       TZ: 'Europe/London'
     volumes:
       - ./etc-pihole:/etc/pihole:ro
-      - ./nebula-sync.env:/app/nebula-sync.env:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./nebula-sync.env:/app/nebula-sync/.env:ro
     depends_on:
       - pihole
     restart: unless-stopped
@@ -85,17 +84,16 @@ FULL_SYNC=true
   DEBOUNCE_TIME: 3
   ```
 
-- Docker command to run on changes detected
+- A command to run on changes detected
 
   ```
-  ONCHANGE_CMD: docker run --rm --name nebula-sync --env-file nebula-sync.env --network pihole-net ghcr.io/lovelaze/nebula-sync:latest
+  ONCHANGE_CMD: /app/nebula-sync/nebula-sync run --env-file /app/nebula-sync/.env
   ```
 
-  This command simply starts Nebula Sync. Ensure the container name matches the one defined in your docker-compose file. `--network pihole-net` must match the one that Pi-hole uses.
+  This command simply starts Nebula Sync with env file passed.
 
 - Pi-hole primary instance url (in docker network) and a password. If your docker service Pi-hole named pihole then url is `http://pihole`. The password should match `FTLCONF_webserver_api_password` config
   ```
   PIHOLE_API_URL: http://pihole
   PIHOLE_PASSWORD: 'correct horse battery staple'
   ```
-
